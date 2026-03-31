@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e911651cc3416a4a86cd6505f975b1b, type: 3}
+  m_Name: DataArcher
+  m_EditorClassIdentifier: 
+  unitName: Archer
+  type: 1
+  prices: 3c0000005a0000007800000096000000b4000000
+  damages:
+  - 2
+  - 4
+  - 6
+  - 8
+  - 10
+  ranges:
+  - 5
+  - 8
+  - 12
+  - 15
+  - 18
+  attackSpeed: 1
+  maxLevel: 5
+  buffAmounts: []
+  aoeRadii: []
+  incomePerWave: 

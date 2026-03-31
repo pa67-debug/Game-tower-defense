@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e911651cc3416a4a86cd6505f975b1b, type: 3}
+  m_Name: DataFarm
+  m_EditorClassIdentifier: 
+  unitName: Farm
+  type: 4
+  prices: 0000000000000000000000000000000000000000
+  damages: []
+  ranges:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  attackSpeed: 0
+  maxLevel: 5
+  buffAmounts: []
+  aoeRadii: []
+  incomePerWave: 140000001e0000002d0000003700000046000000
