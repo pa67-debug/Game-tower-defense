@@ -6,6 +6,7 @@ public class Billboard : MonoBehaviour
     {
         if (Camera.main == null) return;
 
-        transform.rotation = Camera.main.transform.rotation;
+        Vector3 dir = transform.position - Camera.main.transform.position;
+        transform.forward = dir;
     }
 }

@@ -5,6 +5,9 @@ public class Tower : MonoBehaviour
     public UnitData data;
     public int currentLevel = 0;
 
+    [Header("Range Visual")]
+    public GameObject rangeIndicator;
+
     float baseDamage;
     float range;
     float attackCooldown;
@@ -14,15 +17,16 @@ public class Tower : MonoBehaviour
 
     void Start()
     {
-        ApplyStats();
+        ApplyStats(); // 👈 จะเรียก UpdateRangeVisual() ข้างในแล้ว
+
+        if (rangeIndicator != null)
+            rangeIndicator.SetActive(false);
     }
 
     void Update()
     {
-        // 🔥 รีเซ็ตบัพทุกเฟรม
         buffMultiplier = 1f;
 
-        // 💰 Farm ไม่โจมตี
         if (data.type == UnitType.Farm) return;
 
         timer += Time.deltaTime;
@@ -40,16 +44,45 @@ public class Tower : MonoBehaviour
 
     void ApplyStats()
     {
+        if (data == null) return;
+
         baseDamage = data.GetDamage(currentLevel);
         range = data.GetRange(currentLevel);
+
+        // 🔥 DEBUG เช็คค่า
+        Debug.Log("Range ตอนนี้ = " + range);
 
         if (data.attackSpeed > 0)
             attackCooldown = 1f / data.attackSpeed;
         else
             attackCooldown = 1f;
+
+        UpdateRangeVisual(); // 👈 ย้ายมาไว้ตรงนี้ (สำคัญ!)
     }
 
-    // 🔥 ยิงปกติ + Mage AOE + รองรับ Flying
+    // 🔥 อัปเดตขนาดวง (แก้ให้ชัวร์)
+    void UpdateRangeVisual()
+    {
+        if (rangeIndicator == null) return;
+
+        float size = range * 2f;
+
+        rangeIndicator.transform.localScale = new Vector3(
+            size,
+            0.05f,   // 👈 บางลง จะดูเหมือนวงมากขึ้น
+            size
+        );
+
+        // 👉 บังคับตำแหน่งให้ตรงพื้นเสมอ
+        rangeIndicator.transform.localPosition = new Vector3(0, 0.05f, 0);
+    }
+
+    public void ShowRange(bool show)
+    {
+        if (rangeIndicator != null)
+            rangeIndicator.SetActive(show);
+    }
+
     void Attack()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, range);
@@ -63,7 +96,6 @@ public class Tower : MonoBehaviour
 
             float finalDamage = GetFinalDamage();
 
-            // 💥 Mage AOE
             if (data.type == UnitType.Magic)
             {
                 float aoe = data.GetAOE(currentLevel);
@@ -76,21 +108,18 @@ public class Tower : MonoBehaviour
 
                     Enemy e = aoeHit.GetComponent<Enemy>();
                     if (e != null)
-                    {
-                        e.TakeDamage(finalDamage, data.type); // 🔥 ส่ง type
-                    }
+                        e.TakeDamage(finalDamage, data.type);
                 }
             }
             else
             {
-                enemy.TakeDamage(finalDamage, data.type); // 🔥 ส่ง type
+                enemy.TakeDamage(finalDamage, data.type);
             }
 
             break;
         }
     }
 
-    // 🟢 Support Buff
     void Buff()
     {
         float buff = data.GetBuff(currentLevel);
@@ -102,15 +131,12 @@ public class Tower : MonoBehaviour
             Tower other = t.GetComponent<Tower>();
 
             if (other == null || other == this) continue;
-
-            // ❌ ไม่บัพ Support กันเอง
             if (other.data.type == UnitType.Support) continue;
 
             other.AddBuff(buff);
         }
     }
 
-    // 🔥 รวมบัพหลายตัว
     public void AddBuff(float amount)
     {
         buffMultiplier += amount;
@@ -121,7 +147,6 @@ public class Tower : MonoBehaviour
         return baseDamage * buffMultiplier;
     }
 
-    // 🔼 Upgrade
     public bool CanUpgrade()
     {
         return currentLevel < data.maxLevel - 1;
@@ -132,10 +157,9 @@ public class Tower : MonoBehaviour
         if (!CanUpgrade()) return;
 
         currentLevel++;
-        ApplyStats();
+        ApplyStats(); // 👈 จะอัปเดตวงอัตโนมัติ
     }
 
-    // 🎯 Debug วงระยะ
     void OnDrawGizmosSelected()
     {
         Gizmos.color = (data != null && data.type == UnitType.Support) ? Color.green : Color.red;
