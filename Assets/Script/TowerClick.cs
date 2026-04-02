@@ -4,25 +4,19 @@ public class TowerClick : MonoBehaviour
 {
     public Tower tower;
 
-    static Tower currentTower; // 🔥 จำตัวที่เลือกอยู่
-
-    void OnMouseDown()
+    // 🔥 ต้องเป็น public เพราะ ClickDetect เรียก
+    public void OnMouseDown()
     {
-        TowerUI ui = FindObjectOfType<TowerUI>();
+        // ปิดวงของทุกตัวก่อน
+        Tower[] all = FindObjectsOfType<Tower>();
 
-        if (ui != null)
-        {
-            ui.SelectTower(tower);
-        }
+        foreach (var t in all)
+            t.ShowRange(false);
 
-        // 🔥 ปิดตัวเก่าก่อน
-        if (currentTower != null)
-        {
-            currentTower.ShowRange(false);
-        }
+        // เปิดของตัวที่กด
+        if (tower != null)
+            tower.ShowRange(true);
 
-        // 🔥 เปิดตัวใหม่
-        tower.ShowRange(true);
-        currentTower = tower;
+        Debug.Log("✅ Select Tower: " + gameObject.name);
     }
 }

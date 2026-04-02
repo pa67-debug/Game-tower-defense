@@ -5,40 +5,50 @@ public class Tower : MonoBehaviour
     public UnitData data;
     public int currentLevel = 0;
 
-    [Header("Range Visual")]
-    public GameObject rangeIndicator;
+    [Header("Range Visual (โชว์ตอนกด)")]
+    public GameObject rangeIndicatorEx;
 
-    float baseDamage;
+    [Header("Range Detector (ตัวจริง ยิง)")]
+    public GameObject rangeDetectorObj;
+
+    private SphereCollider rangeDetector;
+
     float range;
     float attackCooldown;
-
     float timer;
-    float buffMultiplier = 1f;
 
     void Start()
     {
-        ApplyStats(); // 👈 จะเรียก UpdateRangeVisual() ข้างในแล้ว
+        if (rangeDetectorObj != null)
+        {
+            rangeDetector = rangeDetectorObj.GetComponent<SphereCollider>();
 
-        if (rangeIndicator != null)
-            rangeIndicator.SetActive(false);
+            rangeDetectorObj.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+            if (rangeDetector != null)
+                rangeDetector.isTrigger = true;
+        }
+
+        ApplyStats();
+
+        if (rangeIndicatorEx != null)
+        {
+            rangeIndicatorEx.SetActive(false);
+            rangeIndicatorEx.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+            Collider col = rangeIndicatorEx.GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+        }
     }
 
     void Update()
     {
-        buffMultiplier = 1f;
-
-        if (data.type == UnitType.Farm) return;
-
         timer += Time.deltaTime;
 
         if (timer >= attackCooldown)
         {
-            if (data.type == UnitType.Support)
-                Buff();
-            else
-                Attack();
-
             timer = 0f;
+            Attack();
         }
     }
 
@@ -46,123 +56,70 @@ public class Tower : MonoBehaviour
     {
         if (data == null) return;
 
-        baseDamage = data.GetDamage(currentLevel);
         range = data.GetRange(currentLevel);
+        attackCooldown = data.attackSpeed > 0 ? data.attackSpeed : 1f;
 
-        // 🔥 DEBUG เช็คค่า
-        Debug.Log("Range ตอนนี้ = " + range);
-
-        if (data.attackSpeed > 0)
-            attackCooldown = 1f / data.attackSpeed;
-        else
-            attackCooldown = 1f;
-
-        UpdateRangeVisual(); // 👈 ย้ายมาไว้ตรงนี้ (สำคัญ!)
+        UpdateRangeVisual();
+        UpdateRangeDetector();
     }
 
-    // 🔥 อัปเดตขนาดวง (แก้ให้ชัวร์)
     void UpdateRangeVisual()
     {
-        if (rangeIndicator == null) return;
+        if (rangeIndicatorEx == null) return;
 
-        float size = range * 2f;
+        float diameter = range * 2f;
 
-        rangeIndicator.transform.localScale = new Vector3(
-            size,
-            0.05f,   // 👈 บางลง จะดูเหมือนวงมากขึ้น
-            size
-        );
-
-        // 👉 บังคับตำแหน่งให้ตรงพื้นเสมอ
-        rangeIndicator.transform.localPosition = new Vector3(0, 0.05f, 0);
+        rangeIndicatorEx.transform.localScale =
+            new Vector3(diameter, 0.01f, diameter);
     }
 
     public void ShowRange(bool show)
     {
-        if (rangeIndicator != null)
-            rangeIndicator.SetActive(show);
+        if (rangeIndicatorEx != null)
+            rangeIndicatorEx.SetActive(show);
+    }
+
+    void UpdateRangeDetector()
+    {
+        if (rangeDetector == null) return;
+
+        rangeDetector.radius = range;
     }
 
     void Attack()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, range);
+        if (rangeDetector == null) return;
+
+        int layerMask = LayerMask.GetMask("Enemy");
+
+        Collider[] hits = Physics.OverlapSphere(
+            rangeDetector.transform.position,
+            rangeDetector.radius,
+            layerMask
+        );
+
+        if (hits.Length == 0) return;
+
+        Enemy target = null;
+        float closest = Mathf.Infinity;
 
         foreach (var hit in hits)
         {
-            if (!hit.CompareTag("Enemy")) continue;
-
-            Enemy enemy = hit.GetComponent<Enemy>();
+            Enemy enemy = hit.GetComponentInParent<Enemy>();
             if (enemy == null) continue;
 
-            float finalDamage = GetFinalDamage();
+            float dist = Vector3.Distance(transform.position, enemy.transform.position);
 
-            if (data.type == UnitType.Magic)
+            if (dist < closest)
             {
-                float aoe = data.GetAOE(currentLevel);
-
-                Collider[] aoeHits = Physics.OverlapSphere(hit.transform.position, aoe);
-
-                foreach (var aoeHit in aoeHits)
-                {
-                    if (!aoeHit.CompareTag("Enemy")) continue;
-
-                    Enemy e = aoeHit.GetComponent<Enemy>();
-                    if (e != null)
-                        e.TakeDamage(finalDamage, data.type);
-                }
+                closest = dist;
+                target = enemy;
             }
-            else
-            {
-                enemy.TakeDamage(finalDamage, data.type);
-            }
-
-            break;
         }
-    }
 
-    void Buff()
-    {
-        float buff = data.GetBuff(currentLevel);
+        if (target == null) return;
 
-        Collider[] towers = Physics.OverlapSphere(transform.position, range);
-
-        foreach (var t in towers)
-        {
-            Tower other = t.GetComponent<Tower>();
-
-            if (other == null || other == this) continue;
-            if (other.data.type == UnitType.Support) continue;
-
-            other.AddBuff(buff);
-        }
-    }
-
-    public void AddBuff(float amount)
-    {
-        buffMultiplier += amount;
-    }
-
-    public float GetFinalDamage()
-    {
-        return baseDamage * buffMultiplier;
-    }
-
-    public bool CanUpgrade()
-    {
-        return currentLevel < data.maxLevel - 1;
-    }
-
-    public void Upgrade()
-    {
-        if (!CanUpgrade()) return;
-
-        currentLevel++;
-        ApplyStats(); // 👈 จะอัปเดตวงอัตโนมัติ
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = (data != null && data.type == UnitType.Support) ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(transform.position, range);
+        float damage = data.GetDamage(currentLevel);
+        target.TakeDamage(damage, data.type);
     }
 }

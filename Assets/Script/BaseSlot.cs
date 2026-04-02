@@ -2,44 +2,24 @@
 
 public class BaseSlot : MonoBehaviour
 {
-    public bool occupied = false;
+    public bool isOccupied = false;
+    public Tower currentTower;
 
-    // 🔥 เรียกตอนคลิกจาก Raycast
     public void OnClick()
     {
-        Debug.Log("CLICK SLOT"); // ✅ ต้องอยู่ในนี้
+        Debug.Log("Click Slot");
 
-        if (occupied) return;
-
-        if (UnitSelector.instance.selectedUnit == null)
+        if (TowerBuildUI.instance == null)
         {
-            Debug.Log("No unit selected");
+            Debug.LogError("ไม่มี TowerBuildUI");
             return;
         }
 
-        UnitData data = UnitSelector.instance.selectedUnit;
-
-        if (data.prefab == null)
-        {
-            Debug.LogError("No prefab assigned!");
-            return;
-        }
-
-        int cost = data.prices[0];
-
-        if (!PlayerMoney.instance.Spend(cost))
-        {
-            Debug.Log("Not enough money");
-            return;
-        }
-
-        Instantiate(data.prefab, transform.position, Quaternion.identity);
-
-        SetOccupied();
+        // 👉 ไม่เปิด UI แล้ว
+        TowerBuildUI.instance.Build(this);
     }
-
     public void SetOccupied()
     {
-        occupied = true;
+        isOccupied = true;
     }
 }

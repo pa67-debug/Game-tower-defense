@@ -32,3 +32,4 @@ MonoBehaviour:
   buffAmounts: []
   aoeRadii: []
   incomePerWave: 
+  prefab: {fileID: 59057144643372903, guid: 70c0b6b678b59e34e96c7a93939881e8, type: 3}

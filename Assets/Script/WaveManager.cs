@@ -158,7 +158,12 @@ public class WaveManager : MonoBehaviour
         GameObject e = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
 
         Enemy enemy = e.GetComponent<Enemy>();
+
+        // 🔥 ใส่ path จาก WaveManager
         enemy.waypoints = waypoints;
+
+        // 🔥 รีเซ็ต waypoint (กัน bug)
+        enemy.SendMessage("Start");
 
         enemiesAlive++;
     }

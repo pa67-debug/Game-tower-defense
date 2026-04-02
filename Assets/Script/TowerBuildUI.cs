@@ -4,40 +4,59 @@ public class TowerBuildUI : MonoBehaviour
 {
     public static TowerBuildUI instance;
 
-    public GameObject panel;
-    BaseSlot currentSlot;
+    public UnitData selectedUnit;
 
     void Awake()
     {
         instance = this;
-        panel.SetActive(false);
     }
 
-    public void Open(BaseSlot slot)
+    public void SelectUnit(UnitData data)
     {
-        currentSlot = slot;
-        panel.SetActive(true);
+        selectedUnit = data;
+        Debug.Log("เลือก: " + data.unitName);
     }
 
-    public void Close()
+    public void Build(BaseSlot slot)
     {
-        panel.SetActive(false);
-    }
-
-    // 🔥 เรียกตอนกดเลือกตัวละคร
-    public void Build(UnitData data)
-    {
-        int cost = data.prices[0];
-
-        if (!PlayerMoney.instance.Spend(cost))
+        if (selectedUnit == null)
         {
-            Debug.Log("Not enough money");
+            Debug.Log("❌ ยังไม่ได้เลือกยูนิต");
             return;
         }
 
-        GameObject tower = Instantiate(data.prefab, currentSlot.transform.position, Quaternion.identity);
+        if (slot.isOccupied)
+        {
+            Debug.Log("❌ ช่องนี้มีแล้ว");
+            return;
+        }
 
-        currentSlot.SetOccupied(); // 🔥 กันวางซ้ำ
-        Close();
+        int cost = selectedUnit.prices[0];
+
+        if (!PlayerMoney.instance.Spend(cost))
+        {
+            Debug.Log("เงินไม่พอ");
+            return;
+        }
+
+        GameObject towerObj = Instantiate(
+            selectedUnit.prefab,
+            slot.transform.position,
+            Quaternion.identity
+        );
+
+        // 🔥 สำคัญที่สุด (แก้ปัญหา Tower ไม่ยิง)
+        Tower tower = towerObj.GetComponent<Tower>();
+        if (tower != null)
+        {
+            tower.data = selectedUnit;
+        }
+        else
+        {
+            Debug.LogError("Prefab ไม่มี Tower Script!");
+        }
+
+        slot.currentTower = tower;
+        slot.SetOccupied();
     }
 }

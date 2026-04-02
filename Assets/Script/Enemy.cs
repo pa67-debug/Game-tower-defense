@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using TMPro;
 
 public enum EnemyType
 {
@@ -14,7 +13,7 @@ public class Enemy : MonoBehaviour
     public EnemyType type;
 
     [Header("Info")]
-    public string enemyName = "Enemy"; // 🔥 ชื่อศัตรู
+    public string enemyName = "Enemy";
 
     [Header("Stats")]
     public float maxHP = 15;
@@ -28,54 +27,42 @@ public class Enemy : MonoBehaviour
     public Transform[] waypoints;
     int currentWaypoint = 0;
 
-    [Header("UI")]
-    public TextMeshPro hpText;
-
     void Start()
     {
         currentHP = maxHP;
-        UpdateUI();
+        currentWaypoint = 0;
     }
 
     void Update()
     {
         Move();
-        UpdateUI();
     }
 
     void Move()
     {
         if (waypoints == null || waypoints.Length == 0) return;
 
-        Transform target = waypoints[currentWaypoint];
-        Vector3 dir = (target.position - transform.position).normalized;
-
-        // 🔥 หันหน้า
-        if (dir.x != 0)
+        if (currentWaypoint >= waypoints.Length)
         {
-            Vector3 scale = transform.localScale;
-            scale.x = Mathf.Sign(dir.x) * Mathf.Abs(scale.x);
-            transform.localScale = scale;
+            ReachGoal();
+            return;
         }
 
+        Transform target = waypoints[currentWaypoint];
+
+        Vector3 dir = (target.position - transform.position).normalized;
         transform.position += dir * speed * Time.deltaTime;
 
         if (Vector3.Distance(transform.position, target.position) < 0.2f)
         {
             currentWaypoint++;
-            if (currentWaypoint >= waypoints.Length)
-            {
-                ReachGoal();
-            }
         }
     }
 
     void ReachGoal()
     {
-        BaseHealth.instance.TakeDamage(1); // 🔥 บ้านโดนตี
-
+        BaseHealth.instance.TakeDamage(1);
         WaveManager.instance.EnemyDied();
-
         Destroy(gameObject);
     }
 
@@ -90,45 +77,44 @@ public class Enemy : MonoBehaviour
         if (shieldHits > 0)
         {
             shieldHits--;
-            UpdateUI();
             return;
         }
 
         currentHP -= dmg;
-        UpdateUI();
 
         if (currentHP <= 0)
         {
             Die();
+            return;
+        }
+
+        // 🔥 อัปเดต UI ถ้าถูกเลือกอยู่
+        if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
+        {
+            EnemyUI.instance.UpdateUI(this);
         }
     }
 
     void Die()
     {
         PlayerMoney.instance.Add(reward);
+        WaveManager.instance.EnemyDied();
 
-        WaveManager.instance.EnemyDied(); // 🔥 แจ้งว่า ตายแล้ว
+        // 🔥 ถ้ากำลังเลือกอยู่ → ปิด UI
+        if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
+        {
+            EnemyUI.instance.Hide();
+        }
 
         Destroy(gameObject);
     }
 
-    // 🔥 UI
-    void UpdateUI()
+    void OnMouseDown()
     {
-        if (hpText == null) return;
-
-        // 🔥 เอาชื่อจาก Type มาเลย
-        string name = type.ToString();
-
-        string text = name + "\n";
-
-        text += $"HP {(int)currentHP}/{(int)maxHP}";
-
-        if (shieldHits > 0)
-        {
-            text += $" SHD{shieldHits}";
-        }
-
-        hpText.text = text;
+        // 🔥 คลิกศัตรู
+        EnemyUI.instance.Show(this);
     }
+
+    public float GetHP() => currentHP;
+    public float GetMaxHP() => maxHP;
 }

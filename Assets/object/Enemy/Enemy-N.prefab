@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3703902152513878420}
   - component: {fileID: 7082052006881085477}
   - component: {fileID: 2460344663930307558}
-  - component: {fileID: 1220725407536393489}
   - component: {fileID: 6418385317478465671}
   m_Layer: 0
   m_Name: Enemy-N
@@ -86,27 +85,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1220725407536393489
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3903752527603942814}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6418385317478465671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,7 +117,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  hpText: {fileID: 3637303215570855952}
 --- !u!1 &4043753640507938357
 GameObject:
   m_ObjectHideFlags: 0
@@ -151,7 +128,6 @@ GameObject:
   - component: {fileID: 2994415323427276369}
   - component: {fileID: 6120008528729541954}
   - component: {fileID: 3637303215570855952}
-  - component: {fileID: 8766613227160954146}
   m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -312,15 +288,3 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 6120008528729541954}
   m_maskType: 0
---- !u!114 &8766613227160954146
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4043753640507938357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab44008b9c1b94e438a3874e8d569100, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
