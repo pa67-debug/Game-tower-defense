@@ -6,10 +6,19 @@ public class EnemyUI : MonoBehaviour
 {
     public static EnemyUI instance;
 
+    [Header("UI")]
     public GameObject panel;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI hpText;
-    public Slider hpBar;
+
+    [Header("HP Image")]
+    public Image hpImage; // 🔥 ใช้แค่ตัวนี้พอ
+
+    [Header("HP Sprites")]
+    public Sprite greenSprite;   // 100%
+    public Sprite yellowSprite;  // <=50%
+    public Sprite redSprite;     // <=30%
+    public Sprite blackSprite;   // 0%
 
     public Enemy currentEnemy;
 
@@ -41,13 +50,31 @@ public class EnemyUI : MonoBehaviour
         float hp = enemy.GetHP();
         float max = enemy.GetMaxHP();
 
+        float percent = Mathf.Clamp01(hp / max);
+
         hpText.text = $"HP {(int)hp}/{(int)max}";
-        hpBar.value = hp / max;
+
+        // 🔥 เปลี่ยน "ภาพล้วน"
+        if (percent <= 0f)
+        {
+            hpImage.sprite = blackSprite;
+        }
+        else if (percent <= 0.3f)
+        {
+            hpImage.sprite = redSprite;
+        }
+        else if (percent <= 0.5f)
+        {
+            hpImage.sprite = yellowSprite;
+        }
+        else
+        {
+            hpImage.sprite = greenSprite;
+        }
     }
 
     void Update()
     {
-        // 🔥 auto update ตลอดถ้ายังเลือกอยู่
         if (currentEnemy != null)
         {
             UpdateUI(currentEnemy);

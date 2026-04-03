@@ -1,13 +1,27 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Farm : MonoBehaviour
 {
     public UnitData data;
-    public int level = 0;
+    public int currentLevel = 0;
 
-    public void GiveIncome()
+    float timer;
+    public float incomeInterval = 5f; // ทุกกี่วิให้เงิน
+
+    void Update()
     {
-        int income = data.incomePerWave[level];
-        PlayerMoney.instance.Add(income);
+        timer += Time.deltaTime;
+
+        if (timer >= incomeInterval)
+        {
+            timer = 0f;
+
+            // 🔥 ใช้ Getter แทน
+            int income = data.GetIncome(currentLevel);
+
+            PlayerMoney.instance.Add(income);
+
+            Debug.Log("Farm ได้เงิน: " + income);
+        }
     }
 }

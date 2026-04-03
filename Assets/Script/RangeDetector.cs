@@ -33,7 +33,10 @@ public class RangeDetector : MonoBehaviour
 
         timer += Time.deltaTime;
 
-        if (timer >= tower.data.attackSpeed)
+        // 🔥 แก้ตรงนี้
+        float attackCooldown = tower.data.GetAttackSpeed(tower.currentLevel);
+
+        if (timer >= attackCooldown)
         {
             Enemy target = GetClosest();
 

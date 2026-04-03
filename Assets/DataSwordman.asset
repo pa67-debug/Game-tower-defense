@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Swordman
   type: 0
+  towerImage: {fileID: -1215705113, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  iconImage: {fileID: 781292820, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   prices: 32000000500000007800000096000000b4000000
   damages:
   - 5
@@ -22,14 +25,17 @@ MonoBehaviour:
   - 11
   - 15
   ranges:
-  - 10
+  - 3
+  - 3
+  - 3
+  - 4
+  - 5
+  attackSpeeds:
+  - 2
   - 2
   - 2
   - 3
   - 3
-  attackSpeed: 3
   maxLevel: 5
-  buffAmounts: []
-  aoeRadii: []
   incomePerWave: 
   prefab: {fileID: 4044268329678624119, guid: e5c3957034de6f64197bcf16616a785c, type: 3}

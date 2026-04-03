@@ -12,14 +12,22 @@ public class PlayerMoney : MonoBehaviour
 
     [Header("FX")]
     public GameObject floatingTextPrefab;
-    public Transform fxSpawnPoint; // จุดเกิดข้อความ
+    public Transform fxSpawnPoint;
     public AudioClip moneySound;
 
     AudioSource audioSource;
 
     void Awake()
     {
+        // 🔥 กันซ้ำ (สำคัญมาก)
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         instance = this;
+
         audioSource = gameObject.AddComponent<AudioSource>();
     }
 
@@ -31,19 +39,26 @@ public class PlayerMoney : MonoBehaviour
     public void Add(int amount)
     {
         money += amount;
+
+        Debug.Log("เงินตอนนี้: " + money); // 👈 เช็ค
+
         UpdateUI();
 
-        // 🔥 เล่นเสียง
         if (moneySound != null)
             audioSource.PlayOneShot(moneySound);
 
-        // 🔥 แสดงข้อความลอย
         if (floatingTextPrefab != null && fxSpawnPoint != null)
         {
-            GameObject obj = Instantiate(floatingTextPrefab, fxSpawnPoint.position, Quaternion.identity, fxSpawnPoint);
+            GameObject obj = Instantiate(
+                floatingTextPrefab,
+                fxSpawnPoint.position,
+                Quaternion.identity,
+                fxSpawnPoint
+            );
 
             FloatingText ft = obj.GetComponent<FloatingText>();
-            ft.Setup(amount);
+            if (ft != null)
+                ft.Setup(amount);
         }
     }
 
@@ -52,6 +67,9 @@ public class PlayerMoney : MonoBehaviour
         if (money < amount) return false;
 
         money -= amount;
+
+        Debug.Log("เงินตอนนี้: " + money); // 👈 เช็ค
+
         UpdateUI();
         return true;
     }
@@ -59,6 +77,12 @@ public class PlayerMoney : MonoBehaviour
     void UpdateUI()
     {
         if (moneyText != null)
+        {
             moneyText.text = money.ToString();
+        }
+        else
+        {
+            Debug.LogWarning("moneyText ยังไม่ได้ใส่!");
+        }
     }
 }

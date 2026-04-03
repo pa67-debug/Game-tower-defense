@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Archer
   type: 1
+  towerImage: {fileID: -1215705113, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  iconImage: {fileID: 781292820, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   prices: 3c0000005a0000007800000096000000b4000000
   damages:
   - 2
