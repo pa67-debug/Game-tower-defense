@@ -14,17 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Support
   type: 3
+  towerImage: {fileID: 0}
+  iconImage: {fileID: -1433407518, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   prices: 78000000fa00000068010000
-  damages: []
+  damages:
+  - 0
+  - 0
+  - 0
   ranges:
-  - 10
-  - 20
-  - 30
-  attackSpeed: 0
+  - 4
+  - 8
+  - 12
+  attackSpeeds:
+  - 0
+  - 0
+  - 0
   maxLevel: 3
-  buffAmounts:
+  sellPercent: 0.5
+  incomePerWave: 
+  damageBuffPercent:
   - 0.2
   - 0.35
   - 0.5
-  aoeRadii: []
-  incomePerWave: 
+  prefab: {fileID: 4276850788557134499, guid: 89285d494494a8b41b73d31980155943, type: 3}

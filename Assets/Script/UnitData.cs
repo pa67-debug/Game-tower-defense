@@ -28,13 +28,25 @@ public class UnitData : ScriptableObject
 
     public int maxLevel = 5;
 
-    [Header("Farm")] // 🔥 เพิ่ม
+    [Header("Sell")]
+    [Range(0f, 1f)]
+    public float sellPercent = 0.7f;
+
+    [Header("Farm")]
     public int[] incomePerWave;
+
+    // =========================
+    // 🔥 Support (ใหม่)
+    // =========================
+    [Header("Support")]
+    [Tooltip("เช่น 0.2 = +20%")]
+    public float[] damageBuffPercent;
 
     [Header("Prefab")]
     public GameObject prefab;
 
     // ===== GETTERS =====
+
     public float GetDamage(int level)
     {
         if (damages == null || damages.Length == 0) return 0;
@@ -59,9 +71,22 @@ public class UnitData : ScriptableObject
         return attackSpeeds[Mathf.Clamp(level, 0, attackSpeeds.Length - 1)];
     }
 
-    public int GetIncome(int level) // 🔥 เพิ่ม
+    public int GetIncome(int level)
     {
         if (incomePerWave == null || incomePerWave.Length == 0) return 0;
         return incomePerWave[Mathf.Clamp(level, 0, incomePerWave.Length - 1)];
+    }
+
+    // 🔥 Support buff getter
+    public float GetBuff(int level)
+    {
+        if (damageBuffPercent == null || damageBuffPercent.Length == 0) return 0f;
+        return damageBuffPercent[Mathf.Clamp(level, 0, damageBuffPercent.Length - 1)];
+    }
+
+    // 🔥 ใช้ใน UI
+    public int GetUpgradeCost(int level)
+    {
+        return GetPrice(level);
     }
 }

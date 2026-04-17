@@ -31,6 +31,15 @@ public class TowerBuildUI : MonoBehaviour
             return;
         }
 
+        // =========================
+        // 🔥 NEW: เช็ค LIMIT ก่อน
+        // =========================
+        if (!WaveManager.instance.CanBuild(selectedUnit.type))
+        {
+            Debug.Log("❌ " + selectedUnit.type + " เต็มแล้ว!");
+            return;
+        }
+
         int cost = selectedUnit.GetPrice(0);
 
         if (!PlayerMoney.instance.Spend(cost))
@@ -54,8 +63,12 @@ public class TowerBuildUI : MonoBehaviour
             // 🔥 ผูก Slot
             tower.mySlot = slot;
 
-            // 🔥 ใช้ตัวนี้เท่านั้น (แก้ปัญหาสีไม่เปลี่ยน)
             slot.SetOccupied(tower);
+
+            // =========================
+            // 🔥 NEW: นับจำนวน
+            // =========================
+            WaveManager.instance.RegisterTower(selectedUnit.type);
         }
         else
         {

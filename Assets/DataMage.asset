@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Magic
   type: 2
+  towerImage: {fileID: 0}
+  iconImage: {fileID: 976086729, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   prices: 500000006e00000096000000b4000000dc000000
   damages:
   - 6
@@ -27,13 +30,14 @@ MonoBehaviour:
   - 7
   - 9
   - 12
-  attackSpeed: 6
-  maxLevel: 5
-  buffAmounts: []
-  aoeRadii:
-  - 2
-  - 2
+  attackSpeeds:
   - 3
   - 3
   - 4
+  - 5
+  - 6
+  maxLevel: 5
+  sellPercent: 0.5
   incomePerWave: 
+  damageBuffPercent: []
+  prefab: {fileID: 1335603870515575882, guid: 6d9ca9ae24e801f4cb4acdc4ac3a9fc3, type: 3}

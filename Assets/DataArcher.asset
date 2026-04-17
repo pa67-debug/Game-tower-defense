@@ -15,7 +15,7 @@ MonoBehaviour:
   unitName: Archer
   type: 1
   towerImage: {fileID: -1215705113, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  iconImage: {fileID: 781292820, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  iconImage: {fileID: -111535579, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   prices: 3c0000005a0000007800000096000000b4000000
   damages:
@@ -30,9 +30,14 @@ MonoBehaviour:
   - 12
   - 15
   - 18
-  attackSpeed: 1
+  attackSpeeds:
+  - 2
+  - 2
+  - 2
+  - 1
+  - 1
   maxLevel: 5
-  buffAmounts: []
-  aoeRadii: []
+  sellPercent: 0.5
   incomePerWave: 
+  damageBuffPercent: []
   prefab: {fileID: 59057144643372903, guid: 70c0b6b678b59e34e96c7a93939881e8, type: 3}

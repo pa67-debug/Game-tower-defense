@@ -37,5 +37,7 @@ MonoBehaviour:
   - 3
   - 3
   maxLevel: 5
+  sellPercent: 0.5
   incomePerWave: 
+  damageBuffPercent: []
   prefab: {fileID: 4044268329678624119, guid: e5c3957034de6f64197bcf16616a785c, type: 3}

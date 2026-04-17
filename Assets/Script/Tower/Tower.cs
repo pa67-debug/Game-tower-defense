@@ -18,6 +18,9 @@ public class Tower : MonoBehaviour
 
     public BaseSlot mySlot;
 
+    [Header("Buff UI")]
+    public GameObject buffIcon; // 🔥 ลากไอคอนดาบมาใส่
+
     void Start()
     {
         if (rangeDetectorObj != null)
@@ -30,6 +33,8 @@ public class Tower : MonoBehaviour
                 rangeDetector.isTrigger = true;
         }
 
+        totalCost = data.GetPrice(0);
+
         ApplyStats();
 
         if (rangeIndicatorEx != null)
@@ -40,6 +45,16 @@ public class Tower : MonoBehaviour
 
     void Update()
     {
+        // 🔥 Farm + Support ไม่ยิง
+        if (data.type == UnitType.Farm || data.type == UnitType.Support)
+        {
+            GetSupportBuff(); // 🔥 ให้มันเช็ค buff ด้วย
+            return;
+        }
+
+        // 🔥 เช็ค buff ตลอด
+        GetSupportBuff();
+
         timer += Time.deltaTime;
 
         if (timer >= attackCooldown)
@@ -56,8 +71,6 @@ public class Tower : MonoBehaviour
         range = data.GetRange(currentLevel);
         attackCooldown = data.GetAttackSpeed(currentLevel);
 
-        totalCost += data.GetPrice(currentLevel);
-
         if (rangeIndicatorEx != null)
         {
             float diameter = range * 2f;
@@ -70,7 +83,6 @@ public class Tower : MonoBehaviour
             rangeDetector.radius = range;
         }
 
-        // 🔥 สำคัญ: อัปสีตามเลเวล
         if (mySlot != null)
         {
             mySlot.UpdateColor();
@@ -93,8 +105,45 @@ public class Tower : MonoBehaviour
 
         if (target == null) return;
 
-        float damage = data.GetDamage(currentLevel);
-        target.TakeDamage(damage, data.type);
+        float baseDamage = data.GetDamage(currentLevel);
+
+        // 🔥 รับบัพจาก Support
+        float buff = GetSupportBuff();
+
+        float finalDamage = baseDamage * (1f + buff);
+
+        target.TakeDamage(finalDamage, data.type);
+    }
+
+    // =========================
+    // 🔥 NEW: รับบัพจาก Support
+    // =========================
+    float GetSupportBuff()
+    {
+        float totalBuff = 0f;
+        bool isBuffed = false;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, range);
+
+        foreach (var hit in hits)
+        {
+            Tower t = hit.GetComponentInParent<Tower>();
+
+            if (t != null && t != this && t.data.type == UnitType.Support)
+            {
+                float buff = t.data.GetBuff(t.currentLevel);
+                totalBuff += buff;
+
+                if (buff > 0)
+                    isBuffed = true;
+            }
+        }
+
+        // 🔥 เปิด/ปิด UI
+        if (buffIcon != null)
+            buffIcon.SetActive(isBuffed);
+
+        return totalBuff;
     }
 
     void OnMouseDown()
@@ -117,13 +166,16 @@ public class Tower : MonoBehaviour
     {
         if (currentLevel >= data.maxLevel - 1) return;
 
+        int cost = data.GetUpgradeCost(currentLevel);
+        totalCost += cost;
+
         currentLevel++;
-        ApplyStats(); // 🔥 จะไปเรียก UpdateColor()
+        ApplyStats();
     }
 
     public void Sell()
     {
-        int refund = totalCost / 2;
+        int refund = Mathf.RoundToInt(totalCost * data.sellPercent);
 
         Debug.Log("Sell ได้เงิน: " + refund);
 
@@ -132,12 +184,56 @@ public class Tower : MonoBehaviour
             PlayerMoney.instance.Add(refund);
         }
 
-        // 🔥 สำคัญ: รีเซ็ต Slot + สี
         if (mySlot != null)
         {
             mySlot.ClearSlot();
         }
 
+        if (WaveManager.instance != null)
+        {
+            WaveManager.instance.RemoveTower(data.type);
+        }
+
+        if (!WaveManager.instance.CanBuild(data.type))
+        {
+            Debug.Log("เต็มแล้ว!");
+            return;
+        }
+
+        // Instantiate...
+
+        WaveManager.instance.RegisterTower(data.type);
         Destroy(gameObject);
+    }
+
+    public int GetTotalCost()
+    {
+        return totalCost;
+    }
+
+    // =========================
+    // 🔥 Farm ให้เงิน
+    // =========================
+    public void GiveFarmIncome()
+    {
+        if (data.type != UnitType.Farm) return;
+
+        int income = data.GetIncome(currentLevel);
+
+        Debug.Log("Farm +" + income);
+
+        if (PlayerMoney.instance != null)
+        {
+            PlayerMoney.instance.Add(income);
+        }
+    }
+    public float GetFinalDamage()
+    {
+        float baseDamage = data.GetDamage(currentLevel);
+
+        // 🔥 เอาบัพจริง
+        float buff = GetSupportBuff();
+
+        return baseDamage * (1f + buff);
     }
 }

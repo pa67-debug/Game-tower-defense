@@ -66,14 +66,14 @@
     <Compile Include="Assets\Script\BaseHealth.cs" />
     <Compile Include="Assets\Script\Enemy.cs" />
     <Compile Include="Assets\Script\RangeDetector.cs" />
-    <Compile Include="Assets\Script\TowerClick.cs" />
     <Compile Include="Assets\Script\FloatingText.cs" />
     <Compile Include="Assets\Script\Billboard.cs" />
     <Compile Include="Assets\Script\Farm.cs" />
     <Compile Include="Assets\Script\WaveManager.cs" />
     <Compile Include="Assets\Script\Tower\Tower.cs" />
+    <Compile Include="Assets\Script\Tower\TowerClick.cs" />
     <Compile Include="Assets\Script\Tower\TowerBuildUI.cs" />
-    <Compile Include="Assets\Script\TowerUI.cs" />
+    <Compile Include="Assets\Script\Tower\TowerUI.cs" />
     <Compile Include="Assets\Script\PlayerMoney.cs" />
     <Compile Include="Assets\Script\UnitData.cs" />
     <Compile Include="Assets\Script\Tower\TowerUIManager.cs" />

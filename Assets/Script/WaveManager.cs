@@ -27,10 +27,25 @@ public class WaveManager : MonoBehaviour
     public TextMeshProUGUI countdownText;
     public GameObject skipPanel;
 
+    [Header("Enemy Count UI")]
+    public TextMeshProUGUI enemyCountText;
+    public TextMeshProUGUI skipWarningText;
+
     int currentWave = 0;
     int enemiesAlive = 0;
 
     bool skipPressed = false;
+
+    // =========================
+    // 🔥 UNIT LIMIT SYSTEM
+    // =========================
+    Dictionary<UnitType, int> unitCount = new Dictionary<UnitType, int>();
+
+    Dictionary<UnitType, int> unitLimit = new Dictionary<UnitType, int>()
+    {
+        { UnitType.Farm, 5 },
+        { UnitType.Support, 3 }
+    };
 
     void Awake()
     {
@@ -40,28 +55,27 @@ public class WaveManager : MonoBehaviour
     void Start()
     {
         skipPanel.SetActive(false);
+        UpdateEnemyUI();
         StartCoroutine(GameLoop());
     }
 
     IEnumerator GameLoop()
     {
-        // 🔥 นับถอยหลังก่อนเริ่มเกม
         yield return StartCoroutine(StartCountdown());
 
         while (currentWave < 15)
         {
             yield return StartCoroutine(RunWave());
 
-            // 💰 ให้เงิน
-            PlayerMoney.instance.Add(120);
+            GiveFarmIncome();
 
+            PlayerMoney.instance.Add(120);
             currentWave++;
         }
 
         Debug.Log("YOU WIN!");
     }
 
-    // ⏱ นับถอยหลัง 10 วิ
     IEnumerator StartCountdown()
     {
         float t = startCountdown;
@@ -85,32 +99,27 @@ public class WaveManager : MonoBehaviour
 
         var data = GetWaveData(waveNumber);
 
-        // 🔥 Spawn มอน
         yield return StartCoroutine(SpawnEnemies(normalPrefab, data.normal));
         yield return StartCoroutine(SpawnEnemies(armoredPrefab, data.armored));
         yield return StartCoroutine(SpawnEnemies(flyingPrefab, data.flying));
         yield return StartCoroutine(SpawnEnemies(bossPrefab, data.boss));
 
-        // 🔥 หลัง spawn เสร็จ → รอ
         float timer = 0f;
         bool skipShown = false;
 
         while (true)
         {
-            // ✔ ถ้าตายหมด → ไปเวฟถัดไป
             if (enemiesAlive <= 0)
                 break;
 
             timer += Time.deltaTime;
 
-            // 🔥 ครบ 20 วิ → โชว์ skip
             if (timer >= timeBetweenWaves && !skipShown)
             {
                 skipShown = true;
                 ShowSkipUI();
             }
 
-            // ✔ กด YES → ข้ามทันที
             if (skipPressed)
                 break;
 
@@ -123,7 +132,10 @@ public class WaveManager : MonoBehaviour
     void ShowSkipUI()
     {
         if (skipPanel != null)
+        {
             skipPanel.SetActive(true);
+            UpdateSkipState();
+        }
     }
 
     void HideSkipUI()
@@ -132,13 +144,27 @@ public class WaveManager : MonoBehaviour
             skipPanel.SetActive(false);
     }
 
-    // 🔘 YES
+    void UpdateSkipState()
+    {
+        if (skipWarningText == null) return;
+
+        if (enemiesAlive > 20)
+            skipWarningText.text = "Too many enemies! ( > 20 )";
+        else
+            skipWarningText.text = "";
+    }
+
     public void OnSkipYes()
     {
+        if (enemiesAlive > 20)
+        {
+            Debug.Log("Skip blocked");
+            return;
+        }
+
         skipPressed = true;
     }
 
-    // 🔘 NO
     public void OnSkipNo()
     {
         skipPanel.SetActive(false);
@@ -158,22 +184,67 @@ public class WaveManager : MonoBehaviour
         GameObject e = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
 
         Enemy enemy = e.GetComponent<Enemy>();
-
-        // 🔥 ใส่ path จาก WaveManager
         enemy.waypoints = waypoints;
-
-        // 🔥 รีเซ็ต waypoint (กัน bug)
         enemy.SendMessage("Start");
 
         enemiesAlive++;
+
+        UpdateEnemyUI();
+        UpdateSkipState();
     }
 
     public void EnemyDied()
     {
         enemiesAlive--;
+
+        UpdateEnemyUI();
+        UpdateSkipState();
     }
 
-    // 📊 ตารางเวฟ
+    void UpdateEnemyUI()
+    {
+        if (enemyCountText != null)
+            enemyCountText.text = "Enemies: " + enemiesAlive;
+    }
+
+    // =========================
+    // 🔥 FARM MONEY
+    // =========================
+    void GiveFarmIncome()
+    {
+        Tower[] towers = FindObjectsOfType<Tower>();
+
+        foreach (Tower t in towers)
+            t.GiveFarmIncome();
+    }
+
+    // =========================
+    // 🔥 LIMIT FUNCTIONS
+    // =========================
+    public bool CanBuild(UnitType type)
+    {
+        if (!unitLimit.ContainsKey(type)) return true;
+
+        int current = unitCount.ContainsKey(type) ? unitCount[type] : 0;
+
+        return current < unitLimit[type];
+    }
+
+    public void RegisterTower(UnitType type)
+    {
+        if (!unitCount.ContainsKey(type))
+            unitCount[type] = 0;
+
+        unitCount[type]++;
+    }
+
+    public void RemoveTower(UnitType type)
+    {
+        if (!unitCount.ContainsKey(type)) return;
+
+        unitCount[type]--;
+    }
+
     WaveData GetWaveData(int wave)
     {
         List<WaveData> table = new List<WaveData>()

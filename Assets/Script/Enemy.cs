@@ -61,8 +61,20 @@ public class Enemy : MonoBehaviour
 
     void ReachGoal()
     {
-        BaseHealth.instance.TakeDamage(1);
+        // 🔥 เอา HP ที่เหลือไปตีบ้าน
+        int damage = Mathf.RoundToInt(currentHP);
+
+        BaseHealth.instance.TakeDamage(damage);
+
+        // 🔥 นับว่าศัตรูตายแล้ว
         WaveManager.instance.EnemyDied();
+
+        // 🔥 ปิด UI ถ้าเลือกอยู่
+        if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
+        {
+            EnemyUI.instance.Hide();
+        }
+
         Destroy(gameObject);
     }
 
@@ -88,7 +100,6 @@ public class Enemy : MonoBehaviour
             return;
         }
 
-        // 🔥 อัปเดต UI ถ้าถูกเลือกอยู่
         if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
         {
             EnemyUI.instance.UpdateUI(this);
@@ -100,7 +111,6 @@ public class Enemy : MonoBehaviour
         PlayerMoney.instance.Add(reward);
         WaveManager.instance.EnemyDied();
 
-        // 🔥 ถ้ากำลังเลือกอยู่ → ปิด UI
         if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
         {
             EnemyUI.instance.Hide();
@@ -111,7 +121,6 @@ public class Enemy : MonoBehaviour
 
     void OnMouseDown()
     {
-        // 🔥 คลิกศัตรู
         EnemyUI.instance.Show(this);
     }
 
