@@ -10,7 +10,6 @@ public class WaveManager : MonoBehaviour
     [Header("Enemy Prefabs")]
     public GameObject normalPrefab;
     public GameObject armoredPrefab;
-    public GameObject flyingPrefab;
     public GameObject bossPrefab;
 
     [Header("Spawn")]
@@ -35,17 +34,6 @@ public class WaveManager : MonoBehaviour
     int enemiesAlive = 0;
 
     bool skipPressed = false;
-
-    // =========================
-    // 🔥 UNIT LIMIT SYSTEM
-    // =========================
-    Dictionary<UnitType, int> unitCount = new Dictionary<UnitType, int>();
-
-    Dictionary<UnitType, int> unitLimit = new Dictionary<UnitType, int>()
-    {
-        { UnitType.Farm, 5 },
-        { UnitType.Support, 3 }
-    };
 
     void Awake()
     {
@@ -101,7 +89,6 @@ public class WaveManager : MonoBehaviour
 
         yield return StartCoroutine(SpawnEnemies(normalPrefab, data.normal));
         yield return StartCoroutine(SpawnEnemies(armoredPrefab, data.armored));
-        yield return StartCoroutine(SpawnEnemies(flyingPrefab, data.flying));
         yield return StartCoroutine(SpawnEnemies(bossPrefab, data.boss));
 
         float timer = 0f;
@@ -127,6 +114,42 @@ public class WaveManager : MonoBehaviour
         }
 
         HideSkipUI();
+    }
+
+    IEnumerator SpawnEnemies(GameObject prefab, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Spawn(prefab);
+            yield return new WaitForSeconds(spawnDelay);
+        }
+    }
+
+    void Spawn(GameObject prefab)
+    {
+        GameObject e = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
+
+        Enemy enemy = e.GetComponent<Enemy>();
+        enemy.waypoints = waypoints;
+
+        enemiesAlive++;
+
+        UpdateEnemyUI();
+        UpdateSkipState();
+    }
+
+    public void EnemyDied()
+    {
+        enemiesAlive--;
+
+        UpdateEnemyUI();
+        UpdateSkipState();
+    }
+
+    void UpdateEnemyUI()
+    {
+        if (enemyCountText != null)
+            enemyCountText.text = "Enemies: " + enemiesAlive;
     }
 
     void ShowSkipUI()
@@ -170,46 +193,6 @@ public class WaveManager : MonoBehaviour
         skipPanel.SetActive(false);
     }
 
-    IEnumerator SpawnEnemies(GameObject prefab, int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            Spawn(prefab);
-            yield return new WaitForSeconds(spawnDelay);
-        }
-    }
-
-    void Spawn(GameObject prefab)
-    {
-        GameObject e = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
-
-        Enemy enemy = e.GetComponent<Enemy>();
-        enemy.waypoints = waypoints;
-        enemy.SendMessage("Start");
-
-        enemiesAlive++;
-
-        UpdateEnemyUI();
-        UpdateSkipState();
-    }
-
-    public void EnemyDied()
-    {
-        enemiesAlive--;
-
-        UpdateEnemyUI();
-        UpdateSkipState();
-    }
-
-    void UpdateEnemyUI()
-    {
-        if (enemyCountText != null)
-            enemyCountText.text = "Enemies: " + enemiesAlive;
-    }
-
-    // =========================
-    // 🔥 FARM MONEY
-    // =========================
     void GiveFarmIncome()
     {
         Tower[] towers = FindObjectsOfType<Tower>();
@@ -218,9 +201,54 @@ public class WaveManager : MonoBehaviour
             t.GiveFarmIncome();
     }
 
+    // 🔥 ไม่มี flying แล้ว
+    WaveData GetWaveData(int wave)
+    {
+        List<WaveData> table = new List<WaveData>()
+        {
+            new WaveData(8,0,0),
+            new WaveData(10,0,0),
+            new WaveData(12,1,0),
+            new WaveData(14,2,0),
+            new WaveData(16,3,0),
+            new WaveData(18,4,0),
+            new WaveData(20,5,0),
+            new WaveData(22,6,0),
+            new WaveData(24,8,0),
+            new WaveData(24,8,0),
+            new WaveData(26,10,0),
+            new WaveData(28,12,0),
+            new WaveData(30,14,0),
+            new WaveData(32,16,0),
+            new WaveData(25,15,1)
+        };
+
+        return table[wave - 1];
+    }
+
+    [System.Serializable]
+    public class WaveData
+    {
+        public int normal, armored, boss;
+
+        public WaveData(int n, int a, int b)
+        {
+            normal = n;
+            armored = a;
+            boss = b;
+        }
+    }
     // =========================
-    // 🔥 LIMIT FUNCTIONS
+    // 🔥 UNIT LIMIT SYSTEM (เอากลับมา)
     // =========================
+    Dictionary<UnitType, int> unitCount = new Dictionary<UnitType, int>();
+
+    Dictionary<UnitType, int> unitLimit = new Dictionary<UnitType, int>()
+{
+    { UnitType.Farm, 5 },
+    { UnitType.Support, 3 }
+};
+
     public bool CanBuild(UnitType type)
     {
         if (!unitLimit.ContainsKey(type)) return true;
@@ -243,43 +271,5 @@ public class WaveManager : MonoBehaviour
         if (!unitCount.ContainsKey(type)) return;
 
         unitCount[type]--;
-    }
-
-    WaveData GetWaveData(int wave)
-    {
-        List<WaveData> table = new List<WaveData>()
-        {
-            new WaveData(8,0,0,0),
-            new WaveData(10,0,0,0),
-            new WaveData(12,1,0,0),
-            new WaveData(14,2,0,0),
-            new WaveData(16,3,2,0),
-            new WaveData(18,4,3,0),
-            new WaveData(20,5,4,0),
-            new WaveData(22,6,5,0),
-            new WaveData(24,8,6,0),
-            new WaveData(24,8,10,0),
-            new WaveData(26,10,6,0),
-            new WaveData(28,12,8,0),
-            new WaveData(30,14,10,0),
-            new WaveData(32,16,12,0),
-            new WaveData(25,15,10,1)
-        };
-
-        return table[wave - 1];
-    }
-
-    [System.Serializable]
-    public class WaveData
-    {
-        public int normal, armored, flying, boss;
-
-        public WaveData(int n, int a, int f, int b)
-        {
-            normal = n;
-            armored = a;
-            flying = f;
-            boss = b;
-        }
     }
 }

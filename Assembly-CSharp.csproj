@@ -79,6 +79,7 @@
     <Compile Include="Assets\Script\Tower\TowerUIManager.cs" />
     <Compile Include="Assets\Script\BaseSlot.cs" />
     <Compile Include="Assets\Script\UnitSelector.cs" />
+    <Compile Include="Assets\Script\New\ArcherLine.cs" />
     <Compile Include="Assets\Script\CameraMove.cs" />
     <Compile Include="Assets\Script\UnitButton.cs" />
   </ItemGroup>

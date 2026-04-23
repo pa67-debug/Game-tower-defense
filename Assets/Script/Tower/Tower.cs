@@ -11,15 +11,17 @@ public class Tower : MonoBehaviour
     private SphereCollider rangeDetector;
 
     float range;
-    float attackCooldown;
-    float timer;
-
     int totalCost = 0;
 
     public BaseSlot mySlot;
 
     [Header("Buff UI")]
-    public GameObject buffIcon; // 🔥 ลากไอคอนดาบมาใส่
+    public GameObject buffIcon;
+
+    // 🔥 NEW: ปรับความสูงได้
+    [Header("Placement Settings")]
+    public float heightOffset = 0.5f;
+    public bool autoDetectHeight = true;
 
     void Start()
     {
@@ -35,32 +37,21 @@ public class Tower : MonoBehaviour
 
         totalCost = data.GetPrice(0);
 
+        // 🔥 Auto คำนวณความสูงจาก Collider
+        if (autoDetectHeight)
+        {
+            AutoSetHeight();
+        }
+
         ApplyStats();
 
         if (rangeIndicatorEx != null)
-        {
             rangeIndicatorEx.SetActive(false);
-        }
-    }
 
-    void Update()
-    {
-        // 🔥 Farm + Support ไม่ยิง
-        if (data.type == UnitType.Farm || data.type == UnitType.Support)
+        // 🔥 Snap ลง slot ตอนเริ่ม
+        if (mySlot != null)
         {
-            GetSupportBuff(); // 🔥 ให้มันเช็ค buff ด้วย
-            return;
-        }
-
-        // 🔥 เช็ค buff ตลอด
-        GetSupportBuff();
-
-        timer += Time.deltaTime;
-
-        if (timer >= attackCooldown)
-        {
-            timer = 0f;
-            Attack();
+            SnapToSlot();
         }
     }
 
@@ -69,7 +60,6 @@ public class Tower : MonoBehaviour
         if (data == null) return;
 
         range = data.GetRange(currentLevel);
-        attackCooldown = data.GetAttackSpeed(currentLevel);
 
         if (rangeIndicatorEx != null)
         {
@@ -89,36 +79,29 @@ public class Tower : MonoBehaviour
         }
     }
 
-    void Attack()
+    // =========================
+    // 🔥 Placement System
+    // =========================
+
+    public void SnapToSlot()
     {
-        int layerMask = LayerMask.GetMask("Enemy");
+        transform.position = mySlot.transform.position + Vector3.up * heightOffset;
+    }
 
-        Collider[] hits = Physics.OverlapSphere(
-            transform.position,
-            range,
-            layerMask
-        );
+    void AutoSetHeight()
+    {
+        Collider col = GetComponentInChildren<Collider>();
 
-        if (hits.Length == 0) return;
-
-        Enemy target = hits[0].GetComponentInParent<Enemy>();
-
-        if (target == null) return;
-
-        float baseDamage = data.GetDamage(currentLevel);
-
-        // 🔥 รับบัพจาก Support
-        float buff = GetSupportBuff();
-
-        float finalDamage = baseDamage * (1f + buff);
-
-        target.TakeDamage(finalDamage, data.type);
+        if (col != null)
+        {
+            heightOffset = col.bounds.extents.y;
+        }
     }
 
     // =========================
-    // 🔥 NEW: รับบัพจาก Support
+    // 🔥 Support Buff
     // =========================
-    float GetSupportBuff()
+    public float GetSupportBuff()
     {
         float totalBuff = 0f;
         bool isBuffed = false;
@@ -139,11 +122,17 @@ public class Tower : MonoBehaviour
             }
         }
 
-        // 🔥 เปิด/ปิด UI
         if (buffIcon != null)
             buffIcon.SetActive(isBuffed);
 
         return totalBuff;
+    }
+
+    public float GetFinalDamage()
+    {
+        float baseDamage = data.GetDamage(currentLevel);
+        float buff = GetSupportBuff();
+        return baseDamage * (1f + buff);
     }
 
     void OnMouseDown()
@@ -177,32 +166,15 @@ public class Tower : MonoBehaviour
     {
         int refund = Mathf.RoundToInt(totalCost * data.sellPercent);
 
-        Debug.Log("Sell ได้เงิน: " + refund);
-
         if (PlayerMoney.instance != null)
-        {
             PlayerMoney.instance.Add(refund);
-        }
 
         if (mySlot != null)
-        {
             mySlot.ClearSlot();
-        }
 
         if (WaveManager.instance != null)
-        {
             WaveManager.instance.RemoveTower(data.type);
-        }
 
-        if (!WaveManager.instance.CanBuild(data.type))
-        {
-            Debug.Log("เต็มแล้ว!");
-            return;
-        }
-
-        // Instantiate...
-
-        WaveManager.instance.RegisterTower(data.type);
         Destroy(gameObject);
     }
 
@@ -211,29 +183,34 @@ public class Tower : MonoBehaviour
         return totalCost;
     }
 
-    // =========================
-    // 🔥 Farm ให้เงิน
-    // =========================
     public void GiveFarmIncome()
     {
         if (data.type != UnitType.Farm) return;
 
         int income = data.GetIncome(currentLevel);
 
-        Debug.Log("Farm +" + income);
-
         if (PlayerMoney.instance != null)
         {
             PlayerMoney.instance.Add(income);
         }
     }
-    public float GetFinalDamage()
+
+    public void RotateToEnemy(Transform target)
     {
-        float baseDamage = data.GetDamage(currentLevel);
+        if (target == null) return;
 
-        // 🔥 เอาบัพจริง
-        float buff = GetSupportBuff();
+        Vector3 dir = target.position - transform.position;
+        dir.y = 0f;
 
-        return baseDamage * (1f + buff);
+        if (dir != Vector3.zero)
+        {
+            Quaternion rot = Quaternion.LookRotation(dir);
+
+            transform.rotation = Quaternion.Lerp(
+                transform.rotation,
+                rot,
+                Time.deltaTime * 10f
+            );
+        }
     }
 }

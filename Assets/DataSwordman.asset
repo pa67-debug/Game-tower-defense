@@ -17,27 +17,27 @@ MonoBehaviour:
   towerImage: {fileID: -1215705113, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   iconImage: {fileID: 781292820, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
   backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  prices: 32000000500000007800000096000000b4000000
+  prices: 32000000500000007800000096000000c8000000
   damages:
   - 5
-  - 7
-  - 9
+  - 8
   - 11
   - 15
+  - 30
   ranges:
-  - 3
-  - 3
-  - 3
+  - 4
   - 4
   - 5
+  - 5
+  - 6
   attackSpeeds:
   - 2
   - 2
   - 2
   - 3
-  - 3
+  - 4
   maxLevel: 5
   sellPercent: 0.5
   incomePerWave: 
   damageBuffPercent: []
-  prefab: {fileID: 4044268329678624119, guid: e5c3957034de6f64197bcf16616a785c, type: 3}
+  prefab: {fileID: 2407918495287085545, guid: 5ff906676f68e8944ba645c41cbd6987, type: 3}

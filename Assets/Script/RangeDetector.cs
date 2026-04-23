@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class RangeDetector : MonoBehaviour
@@ -7,6 +8,20 @@ public class RangeDetector : MonoBehaviour
 
     private List<Enemy> enemies = new List<Enemy>();
     float timer;
+
+    Animator anim;
+    bool isAttacking = false;
+
+    ArcherLine archerLine; // 🔥 เพิ่ม
+
+    void Start()
+    {
+        if (tower != null)
+        {
+            anim = tower.GetComponentInChildren<Animator>();
+            archerLine = tower.GetComponent<ArcherLine>(); // 🔥 หา ArcherLine
+        }
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -29,25 +44,50 @@ public class RangeDetector : MonoBehaviour
     void Update()
     {
         if (tower == null) return;
+
+        CleanList();
+
         if (enemies.Count == 0) return;
 
         timer += Time.deltaTime;
 
-        // 🔥 แก้ตรงนี้
         float attackCooldown = tower.data.GetAttackSpeed(tower.currentLevel);
 
-        if (timer >= attackCooldown)
+        Enemy target = GetClosest();
+        if (target == null) return;
+
+        tower.RotateToEnemy(target.transform);
+
+        if (timer >= attackCooldown && !isAttacking)
         {
-            Enemy target = GetClosest();
-
-            if (target != null)
-            {
-                float dmg = tower.data.GetDamage(tower.currentLevel);
-                target.TakeDamage(dmg, tower.data.type);
-            }
-
-            timer = 0f;
+            StartCoroutine(AttackRoutine(target, attackCooldown));
         }
+    }
+
+    IEnumerator AttackRoutine(Enemy target, float delay)
+    {
+        isAttacking = true;
+
+        // 🔥 เล่นอนิเมชั่น
+        if (anim != null)
+            anim.SetTrigger("Attack");
+
+        yield return new WaitForSeconds(0.2f); // timing ฟัน
+
+        if (target != null)
+        {
+            float dmg = tower.GetFinalDamage();
+            target.TakeDamage(dmg, tower.data.type);
+
+            // 🔥 ยิงเส้นตรงนี้!!
+            if (archerLine != null)
+                archerLine.ShootLine(target.transform);
+        }
+
+        yield return new WaitForSeconds(delay - 0.2f);
+
+        isAttacking = false;
+        timer = 0f;
     }
 
     Enemy GetClosest()
@@ -69,5 +109,10 @@ public class RangeDetector : MonoBehaviour
         }
 
         return closest;
+    }
+
+    void CleanList()
+    {
+        enemies.RemoveAll(e => e == null);
     }
 }

@@ -40,4 +40,4 @@ MonoBehaviour:
   sellPercent: 0.5
   incomePerWave: 
   damageBuffPercent: []
-  prefab: {fileID: 59057144643372903, guid: 70c0b6b678b59e34e96c7a93939881e8, type: 3}
+  prefab: {fileID: 5384372357272173565, guid: db96320db2695ed4f9f30c962125871f, type: 3}
