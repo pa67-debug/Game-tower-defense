@@ -424,8 +424,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firePoint: {fileID: 8096543463677461789}
-  lineDuration: 0.1
-  lineWidth: 1
+  lineDuration: 1
+  lineWidth: 2
   lineColor: {r: 1, g: 0.030846046, b: 0.015686274, a: 1}
 --- !u!1 &5514949034902424702
 GameObject:

@@ -60,12 +60,13 @@
     <Analyzer Include="D:\U\2022.3.54f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Script\UnitSelectUI.cs" />
     <Compile Include="Assets\Script\ClickDetect.cs" />
     <Compile Include="Assets\Script\EnemyUI.cs" />
     <Compile Include="Assets\Script\BaseHealth.cs" />
+    <Compile Include="Assets\Script\New\MainMenuUI.cs" />
     <Compile Include="Assets\Script\Enemy.cs" />
     <Compile Include="Assets\Script\RangeDetector.cs" />
+    <Compile Include="Assets\Script\New\GameBGM.cs" />
     <Compile Include="Assets\Script\FloatingText.cs" />
     <Compile Include="Assets\Script\Billboard.cs" />
     <Compile Include="Assets\Script\Farm.cs" />
@@ -80,6 +81,8 @@
     <Compile Include="Assets\Script\BaseSlot.cs" />
     <Compile Include="Assets\Script\UnitSelector.cs" />
     <Compile Include="Assets\Script\New\ArcherLine.cs" />
+    <Compile Include="Assets\Script\New\BuildConfirmUI.cs" />
+    <Compile Include="Assets\Script\New\BushWind.cs" />
     <Compile Include="Assets\Script\CameraMove.cs" />
     <Compile Include="Assets\Script\UnitButton.cs" />
   </ItemGroup>
@@ -102,6 +105,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\Ocean\Shader\Water_Ocean_01_Smooth.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />

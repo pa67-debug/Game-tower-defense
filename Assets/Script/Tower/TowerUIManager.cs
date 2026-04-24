@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class TowerUIManager : MonoBehaviour
@@ -20,8 +21,9 @@ public class TowerUIManager : MonoBehaviour
     public Image iconImage;
     public Image backgroundImage;
 
-    // 🔊 SOUND
+    [Header("Sound")]
     public AudioClip upgradeSound;
+    public AudioClip failSound;
     private AudioSource audioSource;
 
     private Tower currentTower;
@@ -32,6 +34,7 @@ public class TowerUIManager : MonoBehaviour
         panel.SetActive(false);
 
         audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
     }
 
     void Update()
@@ -41,7 +44,6 @@ public class TowerUIManager : MonoBehaviour
             CloseUI();
         }
 
-        // 🔥 อัปเดต real-time
         if (currentTower != null && panel.activeSelf)
         {
             UpdateUI();
@@ -53,6 +55,9 @@ public class TowerUIManager : MonoBehaviour
         currentTower = tower;
         panel.SetActive(true);
         UpdateUI();
+
+        // 🔥 เคลียร์ selection ของ UI (กันต้องกด 2 ครั้ง)
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     void UpdateUI()
@@ -63,7 +68,7 @@ public class TowerUIManager : MonoBehaviour
         nameText.text = "Name: " + data.unitName;
 
         // =========================
-        // 🔥 แยก Farm กับ Tower ปกติ
+        // 🔥 Farm / Support / Attack
         // =========================
         if (data.type == UnitType.Farm)
         {
@@ -73,6 +78,20 @@ public class TowerUIManager : MonoBehaviour
                 damageText.text = $"Money: {income} → {data.GetIncome(lv + 1)}";
             else
                 damageText.text = $"Money: {income} (MAX)";
+        }
+        else if (data.type == UnitType.Support) // 🔥 นักบวช
+        {
+            float buff = data.GetBuff(lv) * 100f;
+
+            if (lv < data.maxLevel - 1)
+            {
+                float nextBuff = data.GetBuff(lv + 1) * 100f;
+                damageText.text = $"Buff: {buff}% → {nextBuff}%";
+            }
+            else
+            {
+                damageText.text = $"Buff: {buff}% (MAX)";
+            }
         }
         else
         {
@@ -145,20 +164,15 @@ public class TowerUIManager : MonoBehaviour
     {
         if (currentTower == null) return;
 
-        if (currentTower.currentLevel >= currentTower.data.maxLevel - 1)
+        bool success = currentTower.Upgrade();
+
+        if (!success)
         {
-            Debug.Log("MAX LEVEL");
+            PlaySound(failSound);
             return;
         }
 
-        currentTower.Upgrade();
-
-        // 🔊 เล่นเสียง
-        if (upgradeSound != null)
-        {
-            audioSource.PlayOneShot(upgradeSound);
-        }
-
+        PlaySound(upgradeSound);
         UpdateUI();
     }
 
@@ -166,7 +180,23 @@ public class TowerUIManager : MonoBehaviour
     {
         if (currentTower == null) return;
 
-        currentTower.Sell();
+        // 🔥 เก็บ reference ก่อน (สำคัญมาก)
+        Tower tower = currentTower;
+
+        // 🔥 เคลียร์ UI focus
+        EventSystem.current.SetSelectedGameObject(null);
+
+        // 🔥 ปิด UI ก่อน (กัน click ซ้อน)
         CloseUI();
+
+        // 🔥 ค่อยขาย
+        tower.Sell();
+    }
+    void PlaySound(AudioClip clip)
+    {
+        if (audioSource == null || clip == null) return;
+
+        audioSource.pitch = Random.Range(0.95f, 1.05f);
+        audioSource.PlayOneShot(clip);
     }
 }

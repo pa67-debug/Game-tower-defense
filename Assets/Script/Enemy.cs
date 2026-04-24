@@ -15,6 +15,9 @@ public class Enemy : MonoBehaviour
     [Header("Info")]
     public string enemyName = "Enemy";
 
+    // 🔥 NEW: Class Icon
+    public Sprite classIcon;
+
     [Header("Stats")]
     public float maxHP = 15;
     float currentHP;
@@ -22,6 +25,10 @@ public class Enemy : MonoBehaviour
     public float speed = 2f;
     public int shieldHits = 0;
     public int reward = 3;
+
+    // 🔥 NEW: Armor
+    [Header("Armor")]
+    public float armor = 0f; // เช่น 0.2 = ลดดาเมจ 20%
 
     [Header("Path")]
     public Transform[] waypoints;
@@ -33,7 +40,7 @@ public class Enemy : MonoBehaviour
     // 🔥 FX
     [Header("FX")]
     public GameObject bloodEffectPrefab;
-    public GameObject deathEffectPrefab; // (ไม่ใส่ก็ได้)
+    public GameObject deathEffectPrefab;
 
     void Start()
     {
@@ -94,28 +101,40 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(float dmg, UnitType attackerType)
     {
+        // 🔥 กัน Flying
         if (type == EnemyType.Flying)
         {
             if (attackerType != UnitType.Ranged && attackerType != UnitType.Magic)
                 return;
         }
 
+        // 🔥 Shield
         if (shieldHits > 0)
         {
             shieldHits--;
             return;
         }
 
-        currentHP -= dmg;
+        // =========================
+        // 🔥 ARMOR SYSTEM
+        // =========================
+        float finalDamage = dmg;
 
-        // 🔥 ถ้าตาย → ไม่เล่นเลือด
+        if (armor > 0)
+        {
+            finalDamage = dmg * (1f - armor);
+        }
+
+        currentHP -= finalDamage;
+
+        // 🔥 ตาย
         if (currentHP <= 0)
         {
             Die();
             return;
         }
 
-        // 🔥 ยังไม่ตาย → เล่นเลือด
+        // 🔥 ยังไม่ตาย
         SpawnBlood();
 
         if (EnemyUI.instance != null && EnemyUI.instance.currentEnemy == this)
@@ -135,14 +154,13 @@ public class Enemy : MonoBehaviour
 
         ParticleSystem ps = fx.GetComponent<ParticleSystem>();
         if (ps != null)
-            ps.Play(); // 🔥 เล่นตอนนี้เท่านั้น
+            ps.Play();
 
         Destroy(fx, 1f);
     }
 
     void Die()
     {
-        // 💀 เอฟเฟคตอนตาย (ถ้ามี)
         if (deathEffectPrefab != null)
         {
             Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
@@ -161,9 +179,19 @@ public class Enemy : MonoBehaviour
 
     void OnMouseDown()
     {
-        EnemyUI.instance.Show(this);
+        if (EnemyUI.instance != null)
+        {
+            EnemyUI.instance.Show(this);
+        }
     }
 
+    // =========================
+    // 🔥 UI GETTERS
+    // =========================
     public float GetHP() => currentHP;
     public float GetMaxHP() => maxHP;
+
+    public float GetArmor() => armor;
+
+    public Sprite GetClassIcon() => classIcon;
 }

@@ -14,38 +14,45 @@ public class TowerBuildUI : MonoBehaviour
     public void SelectUnit(UnitData data)
     {
         selectedUnit = data;
+
+        if (data == null)
+        {
+            Debug.Log("ยกเลิกเลือก");
+            return;
+        }
+
         Debug.Log("เลือก: " + data.unitName);
     }
 
-    public void Build(BaseSlot slot)
+    // 🔥 เปลี่ยนจาก void → bool
+    public bool Build(BaseSlot slot)
     {
         if (selectedUnit == null)
         {
             Debug.Log("❌ ยังไม่ได้เลือกยูนิต");
-            return;
+            return false;
         }
 
         if (slot.isOccupied)
         {
             Debug.Log("❌ ช่องนี้มีแล้ว");
-            return;
+            return false;
         }
 
-        // =========================
-        // 🔥 NEW: เช็ค LIMIT ก่อน
-        // =========================
+        // 🔥 LIMIT
         if (!WaveManager.instance.CanBuild(selectedUnit.type))
         {
             Debug.Log("❌ " + selectedUnit.type + " เต็มแล้ว!");
-            return;
+            return false;
         }
 
         int cost = selectedUnit.GetPrice(0);
 
+        // 🔥 ใช้ Spend แบบมี return
         if (!PlayerMoney.instance.Spend(cost))
         {
             Debug.Log("เงินไม่พอ");
-            return;
+            return false;
         }
 
         GameObject towerObj = Instantiate(
@@ -60,19 +67,19 @@ public class TowerBuildUI : MonoBehaviour
         {
             tower.data = selectedUnit;
 
-            // 🔥 ผูก Slot
+            // 🔥 ผูก slot
             tower.mySlot = slot;
-
             slot.SetOccupied(tower);
 
-            // =========================
-            // 🔥 NEW: นับจำนวน
-            // =========================
+            // 🔥 นับจำนวน
             WaveManager.instance.RegisterTower(selectedUnit.type);
         }
         else
         {
             Debug.LogError("Prefab ไม่มี Tower Script!");
+            return false;
         }
+
+        return true; // ✔ สำเร็จ
     }
 }

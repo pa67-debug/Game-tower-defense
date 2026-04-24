@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems; // 🔥 ต้องมี
 
 public class ClickDetect : MonoBehaviour
 {
@@ -16,6 +17,10 @@ public class ClickDetect : MonoBehaviour
 
     void Update()
     {
+        // 🔥 กันคลิกทะลุ UI
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+
         if (Input.GetMouseButtonDown(0))
         {
             if (cam == null) return;

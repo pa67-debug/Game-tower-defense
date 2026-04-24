@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Farm
   type: 4
-  towerImage: {fileID: 0}
+  towerImage: {fileID: 21300000, guid: 60b69bfb53799c847b69fb454f793380, type: 3}
   iconImage: {fileID: -639814313, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  prices: 78000000c80000005e010000f40100008a020000
+  backgroundImage: {fileID: 208713966, guid: b7a614b40221cf44fa487fb35eff05a7, type: 3}
+  prices: 78000000c80000002c01000090010000f4010000
   damages: []
   ranges:
   - 1
@@ -30,4 +30,4 @@ MonoBehaviour:
   sellPercent: 0.5
   incomePerWave: 140000001e0000002d0000003700000046000000
   damageBuffPercent: []
-  prefab: {fileID: 2473314141613589012, guid: 3545a6b70c79ad246bf2c4f61bab53f0, type: 3}
+  prefab: {fileID: 4871123251319276662, guid: 3545a6b70c79ad246bf2c4f61bab53f0, type: 3}

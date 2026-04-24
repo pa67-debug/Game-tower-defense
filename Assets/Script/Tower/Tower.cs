@@ -18,7 +18,6 @@ public class Tower : MonoBehaviour
     [Header("Buff UI")]
     public GameObject buffIcon;
 
-    // 🔥 NEW: ปรับความสูงได้
     [Header("Placement Settings")]
     public float heightOffset = 0.5f;
     public bool autoDetectHeight = true;
@@ -37,7 +36,6 @@ public class Tower : MonoBehaviour
 
         totalCost = data.GetPrice(0);
 
-        // 🔥 Auto คำนวณความสูงจาก Collider
         if (autoDetectHeight)
         {
             AutoSetHeight();
@@ -48,11 +46,13 @@ public class Tower : MonoBehaviour
         if (rangeIndicatorEx != null)
             rangeIndicatorEx.SetActive(false);
 
-        // 🔥 Snap ลง slot ตอนเริ่ม
         if (mySlot != null)
         {
             SnapToSlot();
         }
+
+        // 🔥 เรียลไทม์ (ไม่หนักเครื่องเกิน)
+        InvokeRepeating(nameof(UpdateBuffUI), 0f, 0.2f);
     }
 
     void ApplyStats()
@@ -79,10 +79,6 @@ public class Tower : MonoBehaviour
         }
     }
 
-    // =========================
-    // 🔥 Placement System
-    // =========================
-
     public void SnapToSlot()
     {
         transform.position = mySlot.transform.position + Vector3.up * heightOffset;
@@ -99,12 +95,11 @@ public class Tower : MonoBehaviour
     }
 
     // =========================
-    // 🔥 Support Buff
+    // 🔥 REALTIME BUFF UI
     // =========================
-    public float GetSupportBuff()
+    void UpdateBuffUI()
     {
         float totalBuff = 0f;
-        bool isBuffed = false;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, range);
 
@@ -114,16 +109,31 @@ public class Tower : MonoBehaviour
 
             if (t != null && t != this && t.data.type == UnitType.Support)
             {
-                float buff = t.data.GetBuff(t.currentLevel);
-                totalBuff += buff;
-
-                if (buff > 0)
-                    isBuffed = true;
+                totalBuff += t.data.GetBuff(t.currentLevel);
             }
         }
 
         if (buffIcon != null)
-            buffIcon.SetActive(isBuffed);
+        {
+            buffIcon.SetActive(totalBuff > 0f);
+        }
+    }
+
+    public float GetSupportBuff()
+    {
+        float totalBuff = 0f;
+
+        Collider[] hits = Physics.OverlapSphere(transform.position, range);
+
+        foreach (var hit in hits)
+        {
+            Tower t = hit.GetComponentInParent<Tower>();
+
+            if (t != null && t != this && t.data.type == UnitType.Support)
+            {
+                totalBuff += t.data.GetBuff(t.currentLevel);
+            }
+        }
 
         return totalBuff;
     }
@@ -151,15 +161,35 @@ public class Tower : MonoBehaviour
             rangeIndicatorEx.SetActive(show);
     }
 
-    public void Upgrade()
+    public bool Upgrade()
     {
-        if (currentLevel >= data.maxLevel - 1) return;
+        if (currentLevel >= data.maxLevel - 1)
+        {
+            Debug.Log("MAX LEVEL");
+            return false;
+        }
 
         int cost = data.GetUpgradeCost(currentLevel);
-        totalCost += cost;
 
+        if (PlayerMoney.instance == null)
+        {
+            Debug.LogError("ไม่มี PlayerMoney ใน Scene");
+            return false;
+        }
+
+        // 🔥 ใช้ Spend (ตัวนี้จะหักเงิน + อัปเดต UI)
+        if (!PlayerMoney.instance.Spend(cost))
+        {
+            Debug.Log("เงินไม่พอ");
+            return false;
+        }
+
+        totalCost += cost;
         currentLevel++;
+
         ApplyStats();
+
+        return true;
     }
 
     public void Sell()

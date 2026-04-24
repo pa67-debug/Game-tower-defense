@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BaseHealth : MonoBehaviour
 {
@@ -8,8 +9,16 @@ public class BaseHealth : MonoBehaviour
     public int maxHP = 100;
     int currentHP;
 
-    public TMP_Text hpText; // 🔥 เพิ่ม
+    public TMP_Text hpText;
     public GameObject loseUI;
+
+    [Header("Sound")]
+    public AudioSource audioSource;
+    public AudioClip hitSound;
+
+    [Header("Lose Sound")]
+    public AudioClip loseSound;   // 🔊 เสียงแพ้
+    public AudioClip loseMusic;   // 🎼 เพลงแพ้ (optional)
 
     void Awake()
     {
@@ -31,7 +40,13 @@ public class BaseHealth : MonoBehaviour
 
         if (currentHP < 0) currentHP = 0;
 
-        UpdateHPText(); // 🔥 อัปเดต UI
+        UpdateHPText();
+
+        // 🔥 เสียงโดนตี
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
 
         if (currentHP <= 0)
         {
@@ -43,7 +58,7 @@ public class BaseHealth : MonoBehaviour
     {
         if (hpText != null)
         {
-            hpText.text = $"HP: {currentHP} / {maxHP}";
+            hpText.text = $"Base\nHP {currentHP}/{maxHP}";
         }
     }
 
@@ -54,6 +69,42 @@ public class BaseHealth : MonoBehaviour
         if (loseUI != null)
             loseUI.SetActive(true);
 
+        // 🔥 หยุดเสียงทั้งหมด
+        AudioSource[] allAudio = FindObjectsOfType<AudioSource>();
+        foreach (AudioSource a in allAudio)
+        {
+            a.Stop();
+        }
+
+        // 🔥 เล่นเสียงแพ้
+        if (audioSource != null && loseSound != null)
+        {
+            audioSource.ignoreListenerPause = true;
+            audioSource.pitch = 1f;
+            audioSource.PlayOneShot(loseSound);
+        }
+
+        // 🔥 เล่นเพลงแพ้ (ถ้ามี)
+        if (audioSource != null && loseMusic != null)
+        {
+            audioSource.clip = loseMusic;
+            audioSource.loop = true;
+            audioSource.PlayDelayed(0.2f);
+        }
+
+        // 🔥 ค่อยหยุดเกม
         Time.timeScale = 0f;
+    }
+
+    public void Replay()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void GoToMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 }

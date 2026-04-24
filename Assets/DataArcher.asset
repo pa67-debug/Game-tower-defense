@@ -14,26 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: Archer
   type: 1
-  towerImage: {fileID: -1215705113, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
+  towerImage: {fileID: 21300000, guid: 09eb56a8cdc67e842bd9e8074908e2c9, type: 3}
   iconImage: {fileID: -111535579, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  backgroundImage: {fileID: -1725148236, guid: 18b631e2d0e7ce94a96a41f341c63742, type: 3}
-  prices: 3c0000005a0000007800000096000000b4000000
+  backgroundImage: {fileID: 208713966, guid: b7a614b40221cf44fa487fb35eff05a7, type: 3}
+  prices: 3c0000005a0000007800000096000000c8000000
   damages:
+  - 1
   - 2
   - 4
   - 6
   - 8
-  - 10
   ranges:
-  - 5
-  - 8
-  - 12
-  - 15
+  - 6
+  - 10
+  - 14
   - 18
+  - 22
   attackSpeeds:
-  - 2
-  - 2
-  - 2
+  - 0.5
+  - 1
+  - 1
   - 1
   - 1
   maxLevel: 5

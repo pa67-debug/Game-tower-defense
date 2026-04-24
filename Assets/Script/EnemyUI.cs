@@ -12,13 +12,16 @@ public class EnemyUI : MonoBehaviour
     public TextMeshProUGUI hpText;
 
     [Header("HP Image")]
-    public Image hpImage; // 🔥 ใช้แค่ตัวนี้พอ
+    public Image hpImage;
 
     [Header("HP Sprites")]
-    public Sprite greenSprite;   // 100%
-    public Sprite yellowSprite;  // <=50%
-    public Sprite redSprite;     // <=30%
-    public Sprite blackSprite;   // 0%
+    public Sprite greenSprite;
+    public Sprite yellowSprite;
+    public Sprite redSprite;
+    public Sprite blackSprite;
+
+    // 🔥 NEW: Class Icon
+    public Image classIcon;
 
     public Enemy currentEnemy;
 
@@ -49,32 +52,46 @@ public class EnemyUI : MonoBehaviour
 
         float hp = enemy.GetHP();
         float max = enemy.GetMaxHP();
-
         float percent = Mathf.Clamp01(hp / max);
 
-        hpText.text = $"HP {(int)hp}/{(int)max}";
+        // =========================
+        // 🔥 HP + SHIELD
+        // =========================
+        int shd = enemy.shieldHits;
 
-        // 🔥 เปลี่ยน "ภาพล้วน"
-        if (percent <= 0f)
-        {
-            hpImage.sprite = blackSprite;
-        }
-        else if (percent <= 0.3f)
-        {
-            hpImage.sprite = redSprite;
-        }
-        else if (percent <= 0.5f)
-        {
-            hpImage.sprite = yellowSprite;
-        }
+        if (shd > 0)
+            hpText.text = $"HP {(int)hp}/{(int)max}  SHD {shd}";
         else
-        {
+            hpText.text = $"HP {(int)hp}/{(int)max}";
+
+        // =========================
+        // 🔥 HP COLOR
+        // =========================
+        if (percent <= 0f)
+            hpImage.sprite = blackSprite;
+        else if (percent <= 0.3f)
+            hpImage.sprite = redSprite;
+        else if (percent <= 0.5f)
+            hpImage.sprite = yellowSprite;
+        else
             hpImage.sprite = greenSprite;
+
+        // =========================
+        // 🔥 CLASS ICON
+        // =========================
+        if (classIcon != null)
+        {
+            classIcon.sprite = enemy.GetClassIcon();
         }
     }
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Hide();
+        }
+
         if (currentEnemy != null)
         {
             UpdateUI(currentEnemy);

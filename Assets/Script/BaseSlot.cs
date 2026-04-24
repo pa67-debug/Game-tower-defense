@@ -13,6 +13,11 @@ public class BaseSlot : MonoBehaviour
     [Tooltip("Lv0, Lv1, Lv2, Lv3, Lv4")]
     public Color[] levelColors;
 
+    [Header("Preview")]
+    public Color previewColor = Color.yellow; // 🔥 สีตอนกำลังเลือก
+
+    bool isPreviewing = false; // 🔥 สถานะ preview
+
     void Start()
     {
         UpdateColor();
@@ -34,7 +39,15 @@ public class BaseSlot : MonoBehaviour
             return;
         }
 
-        TowerBuildUI.instance.Build(this);
+        // 🔥 เปิด UI + ทำช่องเป็นสีเหลือง
+        BuildConfirmUI.instance.Show(this);
+    }
+
+    // 🔥 เรียกตอน Show()
+    public void SetPreview(bool active)
+    {
+        isPreviewing = active;
+        UpdateColor();
     }
 
     public void SetOccupied(Tower tower)
@@ -42,7 +55,9 @@ public class BaseSlot : MonoBehaviour
         isOccupied = true;
         currentTower = tower;
 
-        Debug.Log("SetOccupied: " + tower.name); // 🔥 debug
+        isPreviewing = false; // 🔥 ยกเลิก preview
+
+        Debug.Log("SetOccupied: " + tower.name);
 
         UpdateColor();
     }
@@ -52,6 +67,8 @@ public class BaseSlot : MonoBehaviour
         isOccupied = false;
         currentTower = null;
 
+        isPreviewing = false;
+
         UpdateColor();
     }
 
@@ -60,6 +77,13 @@ public class BaseSlot : MonoBehaviour
         if (rend == null)
         {
             Debug.LogWarning("❌ ยังไม่ได้ใส่ Renderer");
+            return;
+        }
+
+        // 🔥 ถ้ากำลัง preview → สีเหลืองก่อนเลย
+        if (isPreviewing)
+        {
+            rend.material.color = previewColor;
             return;
         }
 
